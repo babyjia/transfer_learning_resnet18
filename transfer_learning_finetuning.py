@@ -12,6 +12,15 @@ from torch.optim import lr_scheduler
 from torch.utils.data import Dataset, DataLoader
 import torchvision
 from torchvision import datasets, models, transforms
+# def rename_images(path,mode):
+#     for files in os.listdir(os.path.join(path,mode)):
+#         i = 1
+#         for images in files:
+#             print(images)
+#             # os.rename(images,str(i))
+#             # int(i)
+#             # i=i+1
+      
 
 
 # define device
@@ -21,6 +30,8 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 # load data and do data augmention
 path = 'data/'
 mode = ('train', 'val')
+# rename_images(path,'train')
+# rename_images(path,'val')
 transform = {
     'train':transforms.Compose([
                 transforms.RandomResizedCrop(224),
@@ -46,14 +57,16 @@ class_names = image_datasets['train'].classes
 dataset_size = {x: len(image_datasets[x]) for x in mode}
 
 # define my net and criterion optimizer
+
 my_resnet18 = torchvision.models.resnet18(pretrained=True)
 num_features = my_resnet18.fc.in_features
-my_resnet18.fc = nn.Linear(512, 2)
+my_resnet18.fc = nn.Linear(512, 4)
 #my_resnet18 = nn.DataParallel(my_resnet18)
 my_resnet18 = my_resnet18.to(device)
 
 criterion = nn.CrossEntropyLoss()
 optimizer = optim.SGD(my_resnet18.parameters(), lr=0.001, momentum=0.9)
+
 exp_lr_scheduler = lr_scheduler.StepLR(optimizer, step_size=7, gamma=0.1)
 
 print(my_resnet18)

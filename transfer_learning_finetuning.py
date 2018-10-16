@@ -30,8 +30,8 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 # load data and do data augmention
 path = 'data/'
 mode = ('train', 'val')
-# rename_images(path,'train')
-# rename_images(path,'val')
+
+
 transform = {
     'train':transforms.Compose([
                 transforms.RandomResizedCrop(224),
@@ -48,28 +48,47 @@ transform = {
 }
 kwargs = {'num_workers':4, 'pin_memory':True}
 
+###    ImageFolder supose the all the same class files saved in the one  as in a folder
+###    ImageFolder(root,transform=None,target_transform=None,loader=
+###    default_loader)
+
+
 image_datasets = {x: datasets.ImageFolder(root=os.path.join(path, x), transform = transform[x])
                         for x in mode}
 
 data_loaders = {x: DataLoader(image_datasets[x], batch_size=4, shuffle=True, **kwargs)
                         for x in mode}
+
 class_names = image_datasets['train'].classes
+
 dataset_size = {x: len(image_datasets[x]) for x in mode}
+
+
 
 # define my net and criterion optimizer
 
 my_resnet18 = torchvision.models.resnet18(pretrained=True)
+
 num_features = my_resnet18.fc.in_features
+
 my_resnet18.fc = nn.Linear(512, 4)
+
 #my_resnet18 = nn.DataParallel(my_resnet18)
+
 my_resnet18 = my_resnet18.to(device)
 
+
+
 criterion = nn.CrossEntropyLoss()
+
 optimizer = optim.SGD(my_resnet18.parameters(), lr=0.001, momentum=0.9)
 
 exp_lr_scheduler = lr_scheduler.StepLR(optimizer, step_size=7, gamma=0.1)
 
 print(my_resnet18)
+
+
+
 #import ipdb; ipdb.set_trace()
 
 # train
